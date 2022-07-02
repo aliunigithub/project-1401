@@ -1,0 +1,18 @@
+
+#define black   "\x1b[30m"
+#define red     "\x1b[31m"
+#define green   "\x1b[32m"
+#define yellow  "\x1b[33m"
+#define blue    "\x1b[34m"
+#define magenta "\x1b[35m"
+#define cyan    "\x1b[36m"
+#define white   "\x1b[37m"
+
+#define BGblack   "\x1b[40m"
+#define BGred     "\x1b[41m"
+#define BGgreen   "\x1b[42m"
+#define BGyellow  "\x1b[43m"
+#define BGblue    "\x1b[44m"
+#define BGmagenta "\x1b[45m"
+#define BGcyan    "\x1b[46m"
+#define BGwhite   "\x1b[47m"
