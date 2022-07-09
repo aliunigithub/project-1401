@@ -2,49 +2,58 @@
 #include<Windows.h>
 #include <stdlib.h> 
 #include <string.h>
+#include "dirent.h"
 #include  <ctype.h>
 #include  <stdio.h>
 #include  "color.h"
-#include "dirent.h"
 #include  <conio.h>
-#include   <math.h>
 
-
-
-
-int position = 0;
-int menu_num = 1;
-
-COORD coord;
-CONSOLE_CURSOR_INFO     cursorInfo;
-FILE* view;
-
-char dir[1000][1000];
-char get_username[100];
-int len_dir;
 
 typedef struct Commponent {
 	char name[100];//name of text_box
-	char label[4] ;// yes\0, no\0
+	char label[4];// yes\0, no\0
 	char radio[4];//  yes\0, no\0
 	char user_label[150];
 	char user_txt[7500];
-	char user_radio = 'f';
-	int hight ;
-	int width ;
-	int x ;
-	int y ;
+	char user_radio;
+	int hight;
+	int width;
+	int x;
+	int y;
 }Commponent;
 
-typedef struct arr_commponent {
+typedef struct Arr_commponent {
 	Commponent* arr;
 	int size;
-}arr_commponent;
+}Arr_commponent;
 
-typedef struct user_data {
-	char name[100];
-	char string[10000];
-}user_data;
+typedef struct text{
+	char arr[7500];
+	int x;
+	int y;
+	
+}Text;
+
+typedef struct Arr_text {
+	Text* arr;
+	int size;
+}Arr_text;
+
+char get_username[100];
+char dir[1000][1000];
+
+int position = 0;
+int menu_num = 1;
+int mode = 1;
+int len_dir;
+
+CONSOLE_CURSOR_INFO     cursorInfo;
+COORD coord;
+
+
+Arr_commponent* array;
+Arr_text* goto_text;
+
 
 #include "functions.h"
 #define maxsize 200
@@ -68,10 +77,11 @@ typedef struct user_data {
 			make_border();
 			printf( BGblue);
 			printf("\n");
-			if (position == 0)printf(white"                       Component           "); else printf(black"                       Component           ");
-			if (position == 1)printf(white"                    run commands          "); else printf(black"                    run commands          ");
-			if (position == 2)printf(white"          exit          "); else printf(black"          exit          ");
-			printf(white"     to navigate->a for left ,d for right");
+			if (position == 0)printf(white"         Component         "); else printf(black"         Component         ");
+			if (position == 1)printf(white"         save form         "); else printf(black"         save form         ");
+			if (position == 2)printf(white"         run commands         "); else printf(black"         run commands         ");
+			if (position == 3)printf(white"         exit         "); else printf(black"         exit         ");
+			printf(white"        to navigate->a for left ,d for right");
 			printf("\n%s\n%s",BGwhite, BGblack);
 			break;
 		}
@@ -90,10 +100,11 @@ typedef struct user_data {
 			make_border();
 			printf(BGyellow);
 			printf("\n");
-			if (position == 0)printf(white"                 save                 "); else printf(black"                 save                 ");
-			if (position == 1)printf(white"                 edit                 "); else printf(black"                 edit                 ");
-			if (position == 2)printf(white"        back         "); else printf(black"        back         ");
-			printf(white"      to navigate->a for left ,d for right           ");
+			if (position == 0)printf(blue"           fill          "); else printf(black"           fill          ");
+			if (position == 1)printf(blue"           goto          "); else printf(black"           goto          ");
+			if (position == 2)printf(blue"           button        "); else printf(black"           button        ");
+			if (position == 3)printf(blue"           back          "); else printf(black"           back          ");
+			printf(blue"              to navigate->a for left ,d for right");
 			printf("\n%s\n%s", BGwhite, BGblack);
 			break;
 		}
@@ -101,10 +112,12 @@ typedef struct user_data {
 			make_border();
 			printf(BGgreen);
 			printf("\n");
-			if (position == 0)printf(white"        make text box          "); else printf(black"        text box          ");
-			if (position == 1)printf(white"        edit text box          "); else printf(black"        label          ");
-			if (position == 2)printf(white"          back         "); else printf(black"          back         ");
-			printf(white"      to navigate->a for left ,d for right          ");
+			if (position == 0)printf(magenta"      add          "); else printf(black"      add          ");
+			if (position == 1)printf(magenta"      find         "); else printf(black"      find         ");
+			if (position == 2)printf(magenta"      edit         "); else printf(black"      edit         ");
+			if (position == 3)printf(magenta"      remove       "); else printf(black"      remove       ");
+			if (position == 4)printf(magenta"      back         "); else printf(black"      back         ");
+			printf(magenta"                   to navigate->a for left ,d for right");
 			printf("\n%s\n%s", BGwhite, BGblack);
 			break;
 		}
@@ -119,10 +132,14 @@ typedef struct user_data {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 int on_press() {
 	int keyboard_press = 0;
+	FILE* file;
+	char info_dir[100] = "./info/";
+	strcat(info_dir, get_username);
+	file = fopen(info_dir, "rb+");
 	menu();
 	while (keyboard_press != 13) {
 		keyboard_press = _getch();
-		if (keyboard_press == 100 && ((menu_num == 1 && position < 2) || (menu_num == 2 && position < 2) || (menu_num == 3 && position < 2) || (menu_num == 4 && position < 5))) {
+		if (keyboard_press == 100 && ((menu_num == 1 && position < 3) || (menu_num == 2 && position < 2) || (menu_num == 3 && position < 3) || (menu_num == 4 && position < 4))) {
 			position++;
 			menu();
 		}
@@ -135,8 +152,15 @@ int on_press() {
 	switch (menu_num)
 	{
 		case(1): {
-			if (position == 2) { exit(1); }
-			menu_num = position + 2;
+			if (position == 3) { exit(1); }
+			switch (position)
+			{
+			case(0): {menu_num = 2; break; }
+			case(1): {system("cls"); printf(green"your form has been saved"); write_(file,0); Sleep(1000);system("cls"); break; }
+			case(2): {menu_num = 3; break; }
+			default:
+				break;
+			}
 			position = 0;
 			return 0;
 		}
@@ -157,9 +181,39 @@ int on_press() {
 			return 0;
 		}
 		case(3): {
-			if (position == 2) { menu_num = 1; position = 0; return 0; }
-			menu_num = position + 2;
+			if (position == 3) { menu_num = 1; position = 0; return 0; }
+			if (position == 0) {
+				system("cls");
+				show(1)
+				fill();
+			}
+			if (position == 1) {
+				show(1)
+				goto_();
+				system("cls");
+			}
+			if (position == 2) {
+				menu_num = 4;
+			}
 			position = 0;
+			return 0;
+			
+		}
+		case(4): {
+			
+			switch (position)
+			{
+			case(0): {system("cls"); printf(green"\t   all of your information has been saved"); Sleep(1000);
+				FILE* information;
+				information = fopen(get_username, "wb");
+				write_(information, 1);
+				system("cls");
+			}
+			case(4):{menu_num = 3; position = 0; return 0; }
+			
+			default:
+				break;
+			}
 			return 0;
 		}
 		
@@ -168,53 +222,97 @@ int on_press() {
 
 	}
 ////////////////////////////////////////////////////////////////////////////////////////////////
-void view_(FILE* file) {
-	/*char ch;
-	rewind(file);
-	system("cls");
-	show(0)
-	position_cmd(0, 0)
-	ch = fgetc(file);
-	while (ch != EOF) {
-		printf(white"%c", ch);
-		ch = fgetc(file);
-	} */
-	char info_dir[100] = "./info/";
-	strcat(info_dir, get_username);
-	file = fopen(info_dir, "r+");
-	arr_commponent* array = read_info(file);
+void view_() {
+	int k = 0;
 	
-	for (size_t i = 0; i < array->size; i++)
+	for (int i = 0; i < array->size; i++)
 	{
-		int k = 0;
-		position_cmd((array->arr + i)->x - 1, (array->arr + i)->y);
-		if (((array->arr + i)->radio)[0] == 'y' && (array->arr+i)->user_radio == 't') {printf(green"O");}
-		else if (((array->arr + i)->radio)[0] == 'y'){ printf(white"O"); }
-		position_cmd((array->arr + i)->x, (array->arr + i)->y);
+		
+		int temp = 1;
+		int coord_y = (array->arr + i)->y + 3;
+		position_cmd((array->arr + i)->x , (array->arr + i)->y);
+		if (((array->arr + i)->radio)[0] == 'y' && (array->arr + i)->user_radio == 't') { printf(green"O "); }
+		else if (((array->arr + i)->radio)[0] == 'y') { printf(white"O "); }
+		else printf(" ");
+		if ((array->arr + i)->label[0] == 'y') {
+			while (k < (array->arr + i)->width && ((array->arr + i)->user_label[k] != '\0') && (array->arr + i)->user_label[k] != '|') {
+				printf("%c", (array->arr + i)->user_label[k]); k++;
+			}
+		}
+		position_cmd((array->arr + i)->x, (array->arr + i)->y+1);
+		k = 0;
 		while (k <= (array->arr + i)->width + 1) { printf(white"-"); k++; }
 		k = 1;
 		while (k <= (array->arr + i)->hight) {
-			position_cmd((((array->arr + i)->x + 1) + (array->arr + i)->width), ((array->arr + i)->y) + k)
+			position_cmd((((array->arr + i)->x + 1) + (array->arr + i)->width), ((array->arr + i)->y+1) + k)
 				printf(".");
 			k++;
 		}
 		k = 1;
 		while (k <= (array->arr + i)->hight)
 		{
-			position_cmd(((array->arr + i)->x), ((array->arr + i)->y) + k)
+			position_cmd(((array->arr + i)->x), ((array->arr + i)->y+1) + k)
 				printf(".");
 			k++;
 		}
 		k = 0;
-		position_cmd(((array->arr + i)->x), ((array->arr + i)->y) + (array->arr + i)->hight + 1)
+		position_cmd(((array->arr + i)->x), ((array->arr + i)->y) + (array->arr + i)->hight + 2)
 			while (k <= (array->arr + i)->width + 1) { printf("-"); k++; }
+		position_cmd((array->arr + i)->x+1, (array->arr + i)->y+2);
+		k = 0;
+		while (k < ((array->arr + i)->width * (array->arr + i)->hight) && (array->arr + i)->user_txt[k] != '\0') {
+			if ((array->arr + i)->user_txt[k] == '\n'|| (temp% ((array->arr + i)->width+1) == 0)) { 
+				position_cmd((array->arr + i)->x + 1, coord_y); coord_y++;  temp = 1; }
+			if (coord_y > (coord_y+(array->arr + i)->hight)) { break; }
+			if ((array->arr + i)->user_txt[k] != '\n' && (array->arr + i)->user_txt[k]!='|') {
+				printf("%c", (array->arr + i)->user_txt[k]); temp++;
+			}
+			k++;
+		}
+
 	}
+	for (int i = 0; i < goto_text->size; i++) {
+		k = 0;
+		int border = 0;
+		int coord_x = (goto_text->arr + i)->x;
+		int coord_y = (goto_text->arr + i)->y;
+		position_cmd(coord_x, coord_y);
+		while ((goto_text->arr + i)->arr[k] != '\0') {
+			if (coord_x+border >= 150 || (goto_text->arr + i)->arr[k] == '\n') {
+				coord_y++;
+				position_cmd(coord_x, coord_y);
+				border = 0;
+		}
+			if (coord_y >= 45) { break; }
+			if ((goto_text->arr + i)->arr[k] != '\n') {
+				printf(white"%c", (goto_text->arr + i)->arr[k]);
+			}
+			k++;
+			border++;
+		}
+	}
+
+
+
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////
 int navigation() {
+	FILE* file;
+	char info_dir[100] = "./info/";
+	if (mode == 1) { array->size = 0; goto_text->size = 0; }
+	if(mode==2){
+		strcat(info_dir, get_username);
+		file = fopen(info_dir, "rb"); 
+		read_info(file,0);
+	}
+	if(mode==3){
+		file = fopen(get_username, "rb");
+		read_info(file,1); }
+	
+	
 	while (1)
 	{
-		view_(view);
+		view_();
 		on_press();
 	}
 	return 0;
@@ -225,8 +323,12 @@ int navigation() {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 int main()
 {
-	
 	show(0)
+	array = (Arr_commponent*)malloc(sizeof(Arr_commponent));
+	array->arr = (Commponent*)malloc(100 * sizeof(Commponent));
+	goto_text = (Arr_text*)malloc(sizeof(Arr_text));
+	goto_text->arr = (Text*)malloc(100 * sizeof(Text));
+
 	len_dir = readdir_(dir);
 	system("mode con:cols=150 lines=50");
 	printf(green R"EOF(
@@ -242,7 +344,7 @@ int main()
 					              welcome to form maker2000
 )EOF");
 	Sleep(10);
-	view = sign_in();
+	sign_in();
 	system("cls");
 	navigation();
 
