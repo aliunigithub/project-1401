@@ -5,6 +5,21 @@ SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
 coord.Y = y;\
 SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 
+#define available_text_box printf(cyan"\nthere are %d text box available\n", array->size);\
+for (int j = 0; j < array->size; j++)\
+{\
+	printf("name=%s \tlabel=%s \tradio_Box=%s \tX=%d \tY=%d \thight=%d \twidth=%d\n", (array->arr + j)->name,\
+		(array->arr + j)->label, (array->arr + j)->radio,\
+		(array->arr + j)->x, (array->arr + j)->y,\
+		(array->arr + j)->hight, (array->arr + j)->width);\
+}\
+
+#define available_text printf(cyan"\nthere are %d texts available\n", goto_text->size);\
+for (int j = 0; j < goto_text->size; j++){\
+	printf("string=%.10s \tx=%d \ty=%d \n",(goto_text->arr + j)->arr,\
+	(goto_text->arr + j)->x, (goto_text->arr + j)->y);\
+}\
+
 void make_border() {
 	for (int i = 0; i < 15; i++)
 	{
@@ -166,14 +181,7 @@ void txt_box(int n) {
 		                     "name label radio_box X Y hight width" e.g.: textbox1 yes no 10 10 10 10)EOF");
 	if (array->size == 0) {printf("\nno text box available\n");
 	}else {
-		printf(cyan"\nthere are %d text box available\n", array->size);
-		for (int j = 0; j < array->size; j++)
-		{
-			printf("name=%s \tlabel=%s \tradio_Box=%s \tX=%d \tY=%d \thight=%d \twidth=%d\n", (array->arr + j)->name ,
-				(array->arr + j)->label, (array->arr + j)->radio,
-				(array->arr + j)->x, (array->arr + j)->y,
-				(array->arr + j)->hight, (array->arr + j)->width);
-		}
+		available_text_box
 	}
 	show(1)
 		if (n == 0) {
@@ -223,14 +231,7 @@ void fill() {
 	int n = 0;
 	strcat(info_dir, get_username);
 	file = fopen(info_dir, "rb");
-	printf(cyan"\nthere are %d text box available\n", array->size);
-	for (int j = 0; j < array->size; j++)
-	{
-		printf("name=%s \tlabel=%s \tradio_Box=%s \tX=%d \tY=%d \thight=%d \twidth=%d\n", (array->arr + j)->name,
-			(array->arr + j)->label, (array->arr + j)->radio,
-			(array->arr + j)->x, (array->arr + j)->y,
-			(array->arr + j)->hight, (array->arr + j)->width);
-	}
+	available_text_box
 	printf(white"enter name of text box: ");
 	scanf("%s", temp);
 	for (int i = 0; i < array->size; i++)
@@ -274,4 +275,142 @@ void goto_() {
 	goto_text->size++;
 	system("cls");
 
+}
+void edit() {
+	show(1)
+	int mode_ = 1;
+	int index = -1;
+	char name[100];
+	if (goto_text->size > 0) {
+		printf("which on?\n1)text_boxes\n2)goto_texts\n");
+		scanf("%d", &mode_);
+		clearBuffer();
+	}
+	system("cls");
+	switch (mode_)
+	{
+	case(1): { available_text_box
+		printf("enter text box name:\n");
+		scanf("%s", name);
+		clearBuffer();
+		for (int i = 0; i < array->size; i++)
+		{
+			if (strcmp((array->arr + i)->name, name) == 0) {
+				index = i; break;
+			}
+		}
+		if (index != -1) {
+			mode_ = 1;/////////
+			printf("which one?\n1)Text_box\n");
+			if ((array->arr + index)->label[0] == 'y') { printf("2)Label\n"); }
+			if ((array->arr + index)->radio[0] == 'y') { printf("3)Radio_box\n"); }
+			scanf("%d", &mode_);
+			clearBuffer();
+
+			switch (mode_)
+			{
+			case(1): {printf("enter your text(ends with (|)): \n"); scanf("%[^|]", (array->arr + index)->user_txt); break; }
+			case(2): {printf("enter your text for label(ends with (|)): \n"); scanf("%[^|]", (array->arr + index)->user_label); break; }
+			case(3): {printf("mode for radio box[t,f]: \n");
+				(array->arr + index)->user_radio = getchar(); break; }
+
+			default:
+				break;
+			}
+			clearBuffer();
+		}
+		else { printf(red"not found"); Sleep(1000); }
+		break;
+	}
+	case(2): {
+		available_text
+		int x = 0, y = 0;
+		printf("enter x and y with white space\n");
+		scanf("%d %d", &x, &y);
+		clearBuffer();
+		for (int i = 0; i < goto_text->size; i++)
+		{
+			if ((goto_text->arr + i)->x == x && (goto_text->arr + i)->y == y) {
+				index = i; break;
+			}
+		}
+		if (index != -1) {
+			printf("enter your text(ends with (|)): \n"); scanf("%[^|]", (goto_text->arr + index)->arr);
+			clearBuffer();
+		}else { 
+			printf(red"not found"); 
+			Sleep(1000); 
+		}
+		break;
+	}
+	default:
+		break;
+	}
+	system("cls");
+	show(0)
+
+}
+
+
+
+
+
+void remove_() {
+	show(1)
+	int mode_ = 1;
+	int index = -1;
+	char name[100];
+	if (goto_text->size > 0) {
+		printf("which on?\n1)text_boxes\n2)goto_texts\n");
+		scanf("%d", &mode_);
+		clearBuffer();
+	}
+	system("cls");
+	switch (mode_)
+	{
+	case(1): { available_text_box
+		printf("enter text box name:\n");
+		scanf("%s", name);
+		clearBuffer();
+		for (int i = 0; i < array->size; i++)
+		{
+			if (strcmp((array->arr + i)->name, name) == 0) {
+				index = i; break;
+			}
+		}
+		if (index != -1) {
+			for (int i = index + 1; i < array->size; i++)
+			{
+				*(array->arr + (i - 1)) = *(array->arr + i);
+			}
+			array->size--;
+		}
+		break;
+	}
+	case(2): {
+		available_text
+		int x = 0, y = 0;
+		printf("enter x and y to remove\n");
+		scanf("%d %d",&x,&y );
+		clearBuffer();
+		for (int i = 0; i < goto_text->size; i++)
+		{
+			if ((goto_text->arr + i)->x==x && (goto_text->arr + i)->y == y) {
+				index = i; break;
+			}
+		}
+		if (index != -1) {
+			for (int i = index + 1; i < goto_text->size; i++)
+			{
+				*(goto_text->arr + (i - 1)) = *(goto_text->arr + i);
+			}
+			goto_text->size--;
+		}
+		break;
+	}
+	default:
+		break;
+	}
+	system("cls");
+	show(0)
 }
