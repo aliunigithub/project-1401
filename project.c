@@ -46,35 +46,35 @@ Arr_component* array;
 #include "functions.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-	 void menu() {
-		
-		position_cmd(0, 46)
+void menu() {
+
+	position_cmd(0, 46)
 		show(0)
-		
+
 
 		switch (menu_num)
 		{
-		case(1): 
+		case(1):
 		{
 			make_border();
-			printf( BGblue);
+			printf(BGblue);
 			printf("\n");
 			if (position == 0)
-				 printf(white"         Component        ");
+				printf(white"         Component        ");
 			else printf(black"         Component        ");
 			if (position == 1)
-				 printf(white"         save form        ");
+				printf(white"         save form        ");
 			else printf(black"         save form        ");
 			if (position == 2)
-				 printf(white"         run commands        ");
+				printf(white"         run commands        ");
 			else printf(black"         run commands        ");
 			if (position == 3)
-				 printf(white"         exit        ");
+				printf(white"         exit        ");
 			else printf(black"         exit        ");
 			printf(white"            to navigate->a for left ,d for right");
 			printf("\n%s", BGblack);
 			reset_color
-			break;
+				break;
 		}
 		case(2):
 		{
@@ -82,64 +82,64 @@ Arr_component* array;
 			printf(BGred);
 			printf("\n");
 			if (position == 0)
-				 printf(white"           make Component           ");
+				printf(white"           make Component           ");
 			else printf(black"           make Component           ");
 			if (position == 1)
-				 printf(white"           edit Component           ");
+				printf(white"           edit Component           ");
 			else printf(black"           edit Component           ");
 			if (position == 2)
-				 printf(white"            back         ");
+				printf(white"            back         ");
 			else printf(black"            back         ");
 			printf(white"                 to navigate->a for left ,d for right");
 			printf("\n%s", BGblack);
 			reset_color
-			break;
+				break;
 		}
-		case(3): 
+		case(3):
 		{
 			make_border();
 			printf(BGyellow);
 			printf("\n");
 			if (position == 0)
-				 printf(blue "          fill         ");
+				printf(blue "          fill         ");
 			else printf(black"          fill         ");
 			if (position == 1)
-				 printf(blue "          button         ");
+				printf(blue "          button         ");
 			else printf(black"          button         ");
 			if (position == 2)
-				 printf(blue "          authorization         ");
+				printf(blue "          authorization         ");
 			else printf(black"          authorization         ");
 			if (position == 3)printf(blue"          back         "); else printf(black"          back         ");
 			printf(blue"           to navigate->a for left ,d for right");
 			printf("\n%s", BGblack);
 			reset_color
-			break;
+				break;
 		}
-		case(4): 
+		case(4):
 		{
 			make_border();
 			printf(BGgreen);
 			printf("\n");
 			if (position == 0)
-				 printf(magenta"            add                ");
+				printf(magenta"            add                ");
 			else printf(black  "            add                ");
 			if (position == 1)
-				 printf(magenta"            find               ");
+				printf(magenta"            find               ");
 			else printf(black  "            find               ");
 			if (position == 2)
-				 printf(magenta"            back               ");
+				printf(magenta"            back               ");
 			else printf(black  "            back               ");
 			printf(magenta"                     to navigate->a for left ,d for right");
 			printf("\n%s", BGblack);
 			reset_color
-			break;
+				break;
 		}
 		default:
 			break;
 		}
-	 }
-	 
-	 
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 int on_press() {
 	FILE* file;
@@ -150,16 +150,16 @@ int on_press() {
 	while (keyboard_press != 13)
 	{
 		keyboard_press = _getch();
-		if (keyboard_press == 100 && 
-		   ((menu_num == 1 && position < 3)  ||
-			(menu_num == 2 && position < 2)  || 
-			(menu_num == 3 && position < 3)  || 
-			(menu_num == 4 && position < 2)  )) 
+		if (keyboard_press == 100 &&
+			((menu_num == 1 && position < 3) ||
+				(menu_num == 2 && position < 2) ||
+				(menu_num == 3 && position < 3) ||
+				(menu_num == 4 && position < 2)))
 		{
 			position++;
 			menu();
 		}
-		if (keyboard_press == 97 && position > 0) 
+		if (keyboard_press == 97 && position > 0)
 		{
 			position--;
 			menu();
@@ -167,176 +167,182 @@ int on_press() {
 	}
 	switch (menu_num)
 	{
-		case(1): 
+	case(1):
+	{
+		switch (position)
 		{
-			switch (position)
+		case(0):
+		{
+			if (access == 1)
 			{
-				case(0): 
-				{
-					if (access == 1) 
-					{ 
-						menu_num = 2; 
-					}else{ 
-						system("cls");
-						printf(red"you are not authorized");
-						Sleep(2000);
-						system("cls");
-					} 
-					break;
-				}
-				case(1): 
-				{
-					if (access == 1) 
-					{
-						system("cls");
-						printf(green"your form has been saved");
-						write_(file, 0);
-						Sleep(2000);
-						system("cls");
-					}else{
-						system("cls"); 
-						printf(red"you are not authorized");
-						Sleep(2000);
-						system("cls");
-					} 
-					break; 
-				}
-				case(2): 
-				{
-					menu_num = 3;
-					break;
-				}
-				default:
-				{
-					exit(1);
-				}
+				menu_num = 2;
 			}
-			position = 0;
-			return 0;
+			else {
+				system("cls");
+				printf(red"you are not authorized");
+				Sleep(2000);
+				system("cls");
+			}
+			break;
 		}
-		case(2): 
+		case(1):
 		{
+			if (access == 1)
+			{
+				system("cls");
+				printf(green"your form has been saved");
+				write_(file, 0);
+				Sleep(2000);
+				system("cls");
+			}
+			else {
+				system("cls");
+				printf(red"you are not authorized");
+				Sleep(2000);
+				system("cls");
+			}
+			break;
+		}
+		case(2):
+		{
+			menu_num = 3;
+			break;
+		}
+		default:
+		{
+			exit(1);
+		}
+		}
+		position = 0;
+		return 0;
+	}
+	case(2):
+	{
 
-			switch (position)
-			{
-				case(0):
-				{
-					system("cls");
-					txt_box(0); 
-					break;
-				}
-				case(1): 
-				{
-					system("cls");
-					txt_box(1); 
-					break;
-				}
-				case(2): 
-				{
-					menu_num = 1;
-					position = 0;
-					return 0;
-				}
+		switch (position)
+		{
+		case(0):
+		{
+			system("cls");
+			txt_box(0);
+			break;
+		}
+		case(1):
+		{
+			system("cls");
+			txt_box(1);
+			break;
+		}
+		case(2):
+		{
+			menu_num = 1;
+			position = 0;
+			return 0;
+		}
 
-				default:
-					break;
+		default:
+			break;
+		}
+		position = 0;
+		return 0;
+	}
+	case(3):
+	{
+		switch (position)
+		{
+		case(0):
+		{
+			system("cls");
+			show(1)
+				fill();
+			break;
+		}
+		case(1):
+		{
+			menu_num = 4;
+			break;
+		}
+		case(2):
+		{
+			show(1)
+				int temp;
+			system("cls");
+			if (access == 1)
+			{
+				printf("you are already authorized");
 			}
+			else {
+				printf("enter token:\n");
+				scanf("%d", &temp);
+				clearBuffer();
+				if (temp == token)
+				{
+					access = 1;
+					printf(green"you are now a admin of this form ");
+				}
+				else {
+					printf(red"wrong token!!");
+				}
+			}
+			Sleep(3000);
+			system("cls");
+			show(0)
+				break;
+		}
+		case(3):
+		{
+			menu_num = 1;
 			position = 0;
 			return 0;
 		}
-		case(3): 
-		{
-			switch (position)
-			{
-				case(0): 
-				{
-					system("cls");
-					show(1)
-					fill(); 
-					break;
-				}
-				case(1): 
-				{
-					menu_num = 4;
-					break;
-				}
-				case(2): 
-				{
-					show(1)
-					int temp;
-					system("cls"); 
-					if (access == 1) 
-					{
-						printf("you are already authorized");
-					}else{
-						printf("enter token:\n"); 
-						scanf("%d", &temp);
-						if (temp == token)
-						{
-							access = 1;
-							printf(green"you are now a admin of this form ");
-						}else {
-							printf(red"wrong token!!");
-						}
-					}   
-					Sleep(3000); 
-					system("cls");
-					show(0)
-					break;  
-				}
-				case(3): 
-				{
-					menu_num = 1;
-					position = 0;
-					return 0;
-				}
-				default:break;
-			}
-			position = 0;
-			return 0;
-		}
-		case(4): 
-		{
-			switch (position)
-			{
-				case(0): 
-				{
-					system("cls");
-					printf(green"\t   all of your information has been saved");
-					Sleep(2000);
-					information = fopen(get_username, "wb");
-					write_(information, 1);
-					system("cls");
-					menu_num = 4;
-					break;
-				}
-				case(1):
-				{
-					if (access == 1) 
-					{ 
-						system("cls");
-						find_keyword();
-						system("cls");
-					}else{
-						system("cls");
-						printf(red"you are not authorized");
-						Sleep(2000);
-						system("cls"); 
-					} 
-					break;
-				}
-				case(2):
-				{
-					menu_num = 3;
-					position = 0;
-					return 0;
-				}
-				default:
-					break;
-				}
-				return 0;
-			}
 		default:break;
+		}
+		position = 0;
+		return 0;
+	}
+	case(4):
+	{
+		switch (position)
+		{
+		case(0):
+		{
+			system("cls");
+			printf(green"\t   all of your information has been saved");
+			Sleep(2000);
+			information = fopen(get_username, "wb");
+			write_(information, 1);
+			system("cls");
+			menu_num = 4;
+			break;
+		}
+		case(1):
+		{
+			if (access == 1)
+			{
+				system("cls");
+				find_keyword();
+				system("cls");
+			}
+			else {
+				system("cls");
+				printf(red"you are not authorized");
+				Sleep(2000);
+				system("cls");
+			}
+			break;
+		}
+		case(2):
+		{
+			menu_num = 3;
+			position = 0;
+			return 0;
+		}
+		default:
+			break;
+		}
+		return 0;
+	}
+	default:break;
 	}
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -344,22 +350,22 @@ int on_press() {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 int navigation() {
 	FILE* file;
-	
-	if (mode == 1) 
-	{ 
+
+	if (mode == 1)
+	{
 		array->size = 0;
 	}
-	if(mode==2)
+	if (mode == 2)
 	{
 		file = fopen(get_username, "rb");
 		read_info(file);
 	}
-	if(mode==3)
+	if (mode == 3)
 	{
 		file = fopen(dest_username, "rb");
 		read_info(file);
 	}
-	
+
 	while (1)
 	{
 		view();
@@ -371,9 +377,9 @@ int navigation() {
 int main()
 {
 	show(0)
-	array = (Arr_component*)malloc(sizeof(Arr_component));
+		array = (Arr_component*)malloc(sizeof(Arr_component));
 	array->arr = (Component*)malloc(100 * sizeof(Component));
-	
+
 	len_dir = readdir_(dir);
 	system("mode con:cols=150 lines=50");
 	printf(green R"EOF(
