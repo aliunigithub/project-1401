@@ -8,17 +8,67 @@ SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 #define available_text_box printf(cyan"\nthere are %d text box available\n", array->size);\
 for (int j = 0; j < array->size; j++)\
 {\
-	printf("name=%s \tlabel=%s \tradio_Box=%s \tX=%d \tY=%d \thight=%d \twidth=%d\n", (array->arr + j)->name,\
-		(array->arr + j)->label, (array->arr + j)->radio,\
+	printf("name=%s \t", (array->arr + j)->name);\
+	if((array->arr+j)->label[0] == 'y')printf("label=%.10s",(array->arr + j)->label_text);\
+	else printf("label=NONE!!    ");\
+	printf("\tradio_Box=%s \tX=%d \tY=%d \thight=%d \twidth=%d\n",(array->arr + j)->radio,\
 		(array->arr + j)->x, (array->arr + j)->y,\
-		(array->arr + j)->hight, (array->arr + j)->width);\
+		(array->arr + j)->hight, (array->arr + j)->width);}\
+
+
+
+#define view_func int k = 0;\
+printf(white" ");\
+for (int i = 0; i < array->size; i++)\
+{\
+	k = 0;\
+	int temp = 1;\
+	int coord_y = (array->arr + i)->y + 3;\
+	position_cmd((array->arr + i)->x, (array->arr + i)->y);\
+	if (((array->arr + i)->radio)[0] == 'y' && (array->arr + i)->user_radio == 't') { printf(green"O "); }\
+	else if (((array->arr + i)->radio)[0] == 'y') { printf(white"O "); }\
+	else printf(" ");\
+	if ((array->arr + i)->label[0] == 'y') {\
+		while ((array->arr + i)->label_text[k] != '\0' && (array->arr + i)->label_text[k] != '|') {\
+			printf("%c", (array->arr + i)->label_text[k]); k++;\
+		}\
+	}\
+	position_cmd((array->arr + i)->x, (array->arr + i)->y + 1);\
+	k = 0;\
+	while (k <= (array->arr + i)->width + 1 && (array->arr + i)->width != 0) { printf(white"-"); k++; }\
+	k = 1;\
+	while (k <= (array->arr + i)->hight) {\
+		position_cmd((((array->arr + i)->x + 1) + (array->arr + i)->width), ((array->arr + i)->y + 1) + k)\
+			printf(".");\
+		k++;\
+	}\
+	k = 1;\
+	while (k <= (array->arr + i)->hight)\
+	{\
+		position_cmd(((array->arr + i)->x), ((array->arr + i)->y + 1) + k)\
+			printf(".");\
+		k++;\
+	}\
+	k = 0;\
+	position_cmd(((array->arr + i)->x), ((array->arr + i)->y) + (array->arr + i)->hight + 2)\
+		while (k <= (array->arr + i)->width + 1 && (array->arr + i)->width != 0) { printf("-"); k++; }\
+	position_cmd((array->arr + i)->x + 1, (array->arr + i)->y + 2);\
+	k = 0;\
+	while (k < ((array->arr + i)->width * (array->arr + i)->hight) && (array->arr + i)->user_txt[k] != '\0') {\
+		if ((array->arr + i)->user_txt[k] == '\n' || (temp % ((array->arr + i)->width + 1) == 0)) {\
+			position_cmd((array->arr + i)->x + 1, coord_y); coord_y++;  temp = 1;\
+		}\
+		if (coord_y > (coord_y + (array->arr + i)->hight)) { break; }\
+		if ((array->arr + i)->user_txt[k] != '\n' && (array->arr + i)->user_txt[k] != '|') {\
+			printf("%c", (array->arr + i)->user_txt[k]); temp++;\
+		}\
+		k++;\
+	}\
+\
 }\
 
-#define available_text printf(cyan"\nthere are %d texts available\n", goto_text->size);\
-for (int j = 0; j < goto_text->size; j++){\
-	printf("string=%.10s \tx=%d \ty=%d \n",(goto_text->arr + j)->arr,\
-	(goto_text->arr + j)->x, (goto_text->arr + j)->y);\
-}\
+
+
 
 void make_border() {
 	for (int i = 0; i < 15; i++)
@@ -51,33 +101,25 @@ void clearBuffer() {
     } while (c != '\n' && c != EOF);
 }
 
-void read_info(FILE* file,int mode) {
+
+
+void read_info(FILE* file) {
 	int i = 0;
 	rewind(file);
+	fread(&token, sizeof(int), 1, file);
 	fread(&array->size, sizeof(int), 1, file);
-	fread(&goto_text->size, sizeof(int), 1, file);
 	while (i < array->size)
 	{
 		fread(&array->arr[i], sizeof(Commponent), 1, file);
 		i++;
 	}
-	if (mode) {
-		i = 0;
-		while (i < goto_text->size)
-		{
-			fread(&goto_text->arr[i], sizeof(Text), 1, file);
-			i++;
-		}
-	}else goto_text->size = 0;
 	fclose(file);
-
 }
 
 void write_( FILE* file, int mode ) {
 	rewind(file);
-	
+	fwrite(&token, sizeof(int), 1, file);
 	fwrite(&array->size, sizeof(int), 1, file);
-	fwrite(&goto_text->size, sizeof(int), 1, file);
 
 	Commponent* temp = (Commponent*)malloc(100 * sizeof(Commponent));
 	
@@ -86,8 +128,8 @@ void write_( FILE* file, int mode ) {
 		for (int i = 0; i < array->size; i++)
 		{
 			(temp + i)->user_radio = 'f';
-			memset((temp + i)->user_label, '|', 150);
 			memset((temp + i)->user_txt, '|', 7500);
+			strcpy((temp + i)->label_text, (array->arr + i)->label_text);
 			strcpy((temp+i)->name, (array->arr+i)->name);
 			strcpy((temp + i)->label, (array->arr + i)->label);
 			strcpy((temp + i)->radio, (array->arr + i)->radio);
@@ -103,61 +145,97 @@ void write_( FILE* file, int mode ) {
 		{
 			fwrite(array->arr + i, sizeof(Commponent), 1, file);
 		}
-		for (int i = 0; i < goto_text->size; i++)
-		{
-			fwrite(goto_text->arr + i, sizeof(Text), 1, file);
-		}
 	}
 	fclose(file);
+}
+
+void change_form(char name[]) {
+	FILE* file;
+	file = fopen(name,"rb");
+	read_info(file);
 }
 
 void sign_in()
 {
 	FILE* file = NULL;
-	FILE* file_info;
-	char username[100], info[105]="./info/";
+	char username[100];
 	int scan;
 	show(1)
 	while (1) {
 		system("cls");
-		printf("please enter your user name (only lowercase and number are allowed)\n");
+		printf("which one?\n1)form maker\n2)form filler\nenter num:");
+		access = getchar() - '0';
+		clearBuffer();
+		system("cls");
+		printf("please enter your username (only lowercase and number are allowed)\n");
 		scan = scanf("%[a-z,0-9]", username);
+		clearBuffer();
 		if (scan != 0)break;
 		else
 		{
-			clearBuffer();
 			system("cls");
 			printf("wrong username");
-			Sleep(2);
+			Sleep(2000);
 		}
 	}
 	strcat(username, ".txt");
 	for (int i = 0; i < len_dir; i++)
 	{
+		int temp;
 		if (strcmp(dir[i], username) == 0) { 
 		file = fopen(dir[i], "rb");
 		system("cls");
-		printf("select mode\n1)new form\n2)only shape (no text)\n3)load everything\nenter num: ");
-		clearBuffer();
-		mode = (getchar() - '0');
+		if (access == 1) {
+			printf("select mode\n1)new form\n2)your form \nenter num: ");
+			mode = (getchar() - '0');
+			clearBuffer();
+			system("cls");
+			printf("your token is: ");
+			scanf("%d", &token);
+			fread(&temp, sizeof(int), 1, file);
+			if (temp != token) { system("cls"); printf(red"wrong token"); exit(1); }
+			clearBuffer();
+			fclose(file);
+			
+		}
+		else {
+			printf("select mode\n1)your form\n2)new form\nenter num: ");
+			
+			mode = (getchar() - '0')+1;
+			clearBuffer();
+			if (mode == 3) {
+				system("cls");
+				printf("form_maker username is ...\n");
+				scanf("%s",dest_username);
+				strcat(dest_username, ".txt");
+				clearBuffer();
+			}
+		
+		}
+		
 		break; }
 	}
 	if (file == NULL)
 	{
-		file = fopen(username, "wb");
-		strcat(info, username);
-		file_info = fopen(info, "wb");
-		array->size = 0;
-		goto_text->size = 0;
-		fwrite(&array->size, sizeof(int), 1, file_info);
-		fwrite(&goto_text->size, sizeof(int), 1, file_info);// make sure to delete
-		fwrite(&array->size, sizeof(int), 1, file);
-		fwrite(&goto_text->size, sizeof(int), 1, file);
-		fclose(file_info);
-		fclose(file);
-		
+		if (access == 1) {
+			printf("enter your token(only num):\n");
+			scanf("%d",&token);
+			
+			file = fopen(username, "wb");
+			array->size = 0;
+			fwrite(&token, sizeof(int), 1, file);
+			fwrite(&array->size, sizeof(int), 1, file);
+			fclose(file);
+		}
+		else {
+			mode = 3;
+			printf("form_maker username is ...\n");
+			scanf("%s", dest_username);
+			strcat(dest_username, ".txt");
+			
+		}
+		clearBuffer();
 	}
-	
 	strcpy(get_username, username);
 	show(0)
 }
@@ -166,18 +244,12 @@ void sign_in()
 
 
 
-
 void txt_box(int n) {
 	
 	Commponent text_box;
-	char arr[6600];
-	FILE* user_view;
-	FILE* file;
-	char info_dir[100] = "./info/";
-	strcat(info_dir, get_username);
-	file = fopen(info_dir, "rb");
+	
 	printf("\t");
-	printf(red R"EOF(      make your text box with this pattern(screen is X = 150 * 50 = Y character so make your sure your txt box is inside screen)
+	printf(red R"EOF(      make your text box with this pattern(screen is X = 150 * 50 = Y character so make sure your txt box is inside screen)
 		                     "name label radio_box X Y hight width" e.g.: textbox1 yes no 10 10 10 10)EOF");
 	if (array->size == 0) {printf("\nno text box available\n");
 	}else {
@@ -189,12 +261,12 @@ void txt_box(int n) {
 			scanf("%s %s %s %d %d %d %d", text_box.name,
 				text_box.label, text_box.radio, &text_box.x,
 				&text_box.y, &text_box.hight, &text_box.width);
-			
+			if (text_box.label[0] == 'y') { printf("\n enter label: "); scanf("%s", text_box.label_text); }
+			text_box.user_txt[0] = '\0';
 			*(array->arr + array->size) = text_box;
+			array->size++;
 			show(0)
 			clearBuffer();
-			array->size++;
-			
 
 		}else{
 			char temp1[100];
@@ -206,11 +278,11 @@ void txt_box(int n) {
 			scanf("%s %s %d %d %d %d",
 				text_box.label, text_box.radio, &text_box.x,
 				&text_box.y, &text_box.hight, &text_box.width);
+			if (text_box.label[0] == 'y') { printf("\n enter label: "); scanf("%s", text_box.label_text); }
 			for (int i = 0; i < array->size; i++)
 			{
 				if( strcmp((array->arr+i)->name,temp1) == 0){
 					strcpy(text_box.user_txt, (array->arr + i)->user_txt);
-					strcpy(text_box.user_label ,(array->arr + i)->user_label);
 					text_box.user_radio = (array->arr + i)->user_radio;
 					*(array->arr + i) = text_box;
 					 break;
@@ -218,36 +290,31 @@ void txt_box(int n) {
 			}
 		}
 	system("cls");
-	fclose(file);
+
 }
 
 void fill() {
-	FILE* file;
-	char info_dir[100] = "./info/";
+	
 	char temp[100];
 	char radio;
 	char c = '\0';
 	int j = 0;
 	int n = 0;
-	strcat(info_dir, get_username);
-	file = fopen(info_dir, "rb");
+	
 	available_text_box
+
 	printf(white"enter name of text box: ");
 	scanf("%s", temp);
+	clearBuffer();
 	for (int i = 0; i < array->size; i++)
 	{
 		if (strcmp((array->arr + i)->name, temp) == 0) {
 			n = i; break;
 		}
 	}
-	if ((array->arr + n)->label[0] == 'y') {
-		printf("enter text for your label(maximum length =%d ): ", (array->arr + n)->width);
-		clearBuffer();
-		scanf("%[^\n]", (array->arr + n)->user_label);
-	}
-	clearBuffer();
-	if ((array->arr + n)->radio[0] == 'y') { printf("mode of radiobox?[t,f]: "); (array->arr + n)->user_radio = getchar(); }
-	clearBuffer();
+	
+	if ((array->arr + n)->radio[0] == 'y') { printf("mode of radiobox?[t,f]: "); (array->arr + n)->user_radio = getchar(); clearBuffer();}
+	
 	printf("enter string for your textbox (max length = %d,end your string with (|)): \n",((array->arr + n)->width* (array->arr + n)->hight));
 	while ((c=getchar())!= '|')
 	{
@@ -256,41 +323,21 @@ void fill() {
 	}
 	(array->arr + n)->user_txt[j] = '\0';
 	system("cls");
-	fclose(file);
 }
-void goto_() {
-	
-	system("cls");
-	printf(red"be careful this function might over write some information USE IT CAREFULLY\n");
-	Sleep(50);
-	system("cls");
-	clearBuffer();
-	printf("enter X = ");
-	scanf("%d",&(goto_text->arr+goto_text->size)->x);
-	printf("\nenter Y = ");
-	scanf("%d", &(goto_text->arr + goto_text->size)->y);
-	printf("enter your text(ends with (|) symbol):\n");
-	clearBuffer();
-	scanf("%[^|]", ((goto_text->arr + goto_text->size)->arr));
-	goto_text->size++;
-	system("cls");
 
-}
-void edit() {
+
+void edit(char user_name[]) {
 	show(1)
 	int mode_ = 1;
-	int index = -1;
+	int index ;
+	char c = '\0';
 	char name[100];
-	if (goto_text->size > 0) {
-		printf("which on?\n1)text_boxes\n2)goto_texts\n");
-		scanf("%d", &mode_);
-		clearBuffer();
-	}
-	system("cls");
-	switch (mode_)
-	{
-	case(1): { available_text_box
-		printf("enter text box name:\n");
+	FILE* file;
+	while (1) {
+		index = -1;
+		system("cls");
+		available_text_box
+			printf("enter text box name:\n");
 		scanf("%s", name);
 		clearBuffer();
 		for (int i = 0; i < array->size; i++)
@@ -300,18 +347,16 @@ void edit() {
 			}
 		}
 		if (index != -1) {
-			mode_ = 1;/////////
+
 			printf("which one?\n1)Text_box\n");
-			if ((array->arr + index)->label[0] == 'y') { printf("2)Label\n"); }
-			if ((array->arr + index)->radio[0] == 'y') { printf("3)Radio_box\n"); }
+			if ((array->arr + index)->radio[0] == 'y') { printf("2)Radio_box\n"); }
 			scanf("%d", &mode_);
 			clearBuffer();
 
 			switch (mode_)
 			{
 			case(1): {printf("enter your text(ends with (|)): \n"); scanf("%[^|]", (array->arr + index)->user_txt); break; }
-			case(2): {printf("enter your text for label(ends with (|)): \n"); scanf("%[^|]", (array->arr + index)->user_label); break; }
-			case(3): {printf("mode for radio box[t,f]: \n");
+			case(2): {printf("mode for radio box[t,f]: \n");
 				(array->arr + index)->user_radio = getchar(); break; }
 
 			default:
@@ -319,32 +364,13 @@ void edit() {
 			}
 			clearBuffer();
 		}
-		else { printf(red"not found"); Sleep(1000); }
-		break;
-	}
-	case(2): {
-		available_text
-		int x = 0, y = 0;
-		printf("enter x and y with white space\n");
-		scanf("%d %d", &x, &y);
+		else { printf(red"not found\n"); Sleep(2000); }
+		printf("are you done?[y,n]:");
+		c = getchar();
 		clearBuffer();
-		for (int i = 0; i < goto_text->size; i++)
-		{
-			if ((goto_text->arr + i)->x == x && (goto_text->arr + i)->y == y) {
-				index = i; break;
-			}
-		}
-		if (index != -1) {
-			printf("enter your text(ends with (|)): \n"); scanf("%[^|]", (goto_text->arr + index)->arr);
-			clearBuffer();
-		}else { 
-			printf(red"not found"); 
-			Sleep(1000); 
-		}
-		break;
-	}
-	default:
-		break;
+		if (c == 'y') { file = fopen(user_name, "wb");
+		write_(file, 1);
+		break; }
 	}
 	system("cls");
 	show(0)
@@ -352,65 +378,104 @@ void edit() {
 }
 
 
+void find_keyword() {
+	int len;
+	int temp;
+	int find = 0;
+	int counter = 0;
+	int keywords = 0;
+	int form_files[100];
+	char c;
+	char find_label[150][150];
+	char find_text[100][7500];
 
+	
+	Commponent find_comp;
+	FILE* file;
+	FILE* main;
 
-
-void remove_() {
+	
 	show(1)
-	int mode_ = 1;
-	int index = -1;
-	char name[100];
-	if (goto_text->size > 0) {
-		printf("which on?\n1)text_boxes\n2)goto_texts\n");
-		scanf("%d", &mode_);
-		clearBuffer();
-	}
+	len_dir = readdir_(dir);
 	system("cls");
-	switch (mode_)
+	printf(white);
+	printf("how many keywords?\n");
+	scanf("%d", &keywords);
+	clearBuffer();
+	for (int j = 0; j < keywords; j++)
 	{
-	case(1): { available_text_box
-		printf("enter text box name:\n");
-		scanf("%s", name);
+		printf("what label are you looking for(if what your looking doest have label or you don't know the label use (|)(end with (|))):\n");
+		scanf("%[^|]", find_label[j]);
 		clearBuffer();
-		for (int i = 0; i < array->size; i++)
-		{
-			if (strcmp((array->arr + i)->name, name) == 0) {
-				index = i; break;
-			}
-		}
-		if (index != -1) {
-			for (int i = index + 1; i < array->size; i++)
-			{
-				*(array->arr + (i - 1)) = *(array->arr + i);
-			}
-			array->size--;
-		}
-		break;
-	}
-	case(2): {
-		available_text
-		int x = 0, y = 0;
-		printf("enter x and y to remove\n");
-		scanf("%d %d",&x,&y );
+		printf("what keyword are you looking for(end with (|))):\n");
+		scanf("%[^|]", find_text[j]);
 		clearBuffer();
-		for (int i = 0; i < goto_text->size; i++)
-		{
-			if ((goto_text->arr + i)->x==x && (goto_text->arr + i)->y == y) {
-				index = i; break;
-			}
-		}
-		if (index != -1) {
-			for (int i = index + 1; i < goto_text->size; i++)
-			{
-				*(goto_text->arr + (i - 1)) = *(goto_text->arr + i);
-			}
-			goto_text->size--;
-		}
-		break;
-	}
-	default:
-		break;
+		
 	}
 	system("cls");
-	show(0)
+	
+	for (int i = 0; i < len_dir; i++)
+	{	
+		find = 0;
+		if (strstr(dir[i], ".txt")) {
+			file = fopen(dir[i],"rb");
+			fread(&temp,sizeof(int),1,file);
+			if (temp == token) {
+				
+				fread(&temp, sizeof(int), 1, file);
+				for (int j = 0; j < temp; j++)
+				{
+					fread(&find_comp, sizeof(Commponent), 1, file);
+					for (int k = 0; k < keywords; k++)
+					{
+						if (strstr(find_comp.label_text, find_label[k]) && strstr(find_comp.user_txt, find_text[k])) {
+							find++;
+						}
+					}
+					if (find == keywords) {  
+					form_files[counter] = i;
+					counter++; break; }
+				}
+			}
+			fclose(file);
+		}
+	}
+	if (counter == 0) {
+		position_cmd(0, 0) printf(red"404 not found"); Sleep(2000);
+	}else {
+		len = counter;
+		counter = 0;
+		while (1) {
+			system("cls");
+			change_form(dir[form_files[counter]]);
+			view_func
+			position_cmd(0, 45);
+			make_border();
+			position_cmd(0, 48);
+			printf(blue"you are now in :%s\navailble commands:n(next form),p(previous form),e(edit),r(remove),b(back to main menu)", dir[form_files[counter]]);
+			show(1)
+			position_cmd(0, 46);
+			c = getchar();
+			clearBuffer();
+			switch (c)
+			{
+			case('n'): {if (counter < len-1)counter++; break; }
+			case('p'): {if (counter > 0)counter--; break; }
+			case('e'): {edit(dir[form_files[counter]]); break; }
+			case('r'): {
+				
+				remove(dir[form_files[counter]]); 
+				for (int s = counter+1; s < len+1; s++)
+				{
+					form_files[s - 1] = form_files[s];
+				}
+				len--;
+				counter = 0;
+				break; }
+			case('b'): {main = fopen(get_username, "rb"); read_info(main); return; }
+			default:
+				break;
+			}
+		}
+	}
 }
